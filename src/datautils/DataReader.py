@@ -12,16 +12,14 @@ import librosa.display
 
 class DataReader:
     def __init__(self):
-
-        # Directory where mp3 are stored.
-        self.AUDIO_DIR = os.getcwd()+"data\\fma_small"
-        os.chdir("data\\fma_metadata")
-
         # Load metadata and features.
+
+        '''
         self.tracks = pd.read_csv('tracks.csv')
         self.genres = pd.read_csv('genres.csv')
         self.features = pd.read_csv('features.csv')
         self.echonest = pd.read_csv('echonest.csv')
+
 
         #np.testing.assert_array_equal(self.features.index, self.tracks.index)
         assert self.echonest.index.isin(self.tracks.index).all()
@@ -29,6 +27,18 @@ class DataReader:
         self.shapes = []
         self.shapes = self.tracks.shape, self.genres.shape, self.features.shape, self.echonest.shape
         print("Finished loading data\n")
+        '''
+
+    def change_working_dir(self):
+        AUDIO_DIR = os.getcwd()+"data\\fma_small"
+        os.chdir("data\\fma_metadata")
+
+    def load_genres(self):
+        self.change_working_dir()
+        print("Loading genres csv...")
+        genres = pd.read_csv('genres.csv')
+        print("Finished loading genres")
+        return genres
 
     def genre_accessor(self):
         print('{} top-level genres'.format(len(self.genres['top_level'].unique())))
