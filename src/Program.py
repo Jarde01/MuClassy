@@ -1,6 +1,13 @@
+from configparser import ConfigParser
+
 from src.datautils.DataReader import DataReader
 import src.datautils.Preprocessing as pp
 import os
+from pathlib import Path
+
+config = ConfigParser()
+config.read('config.ini')
+print(config.sections())
 
 
 # reader = DataReader()
@@ -15,10 +22,9 @@ import os
 #
 # print(genreDict)
 
+music_path = config['DEFAULT']['TrackFolders']
 
-AUDIO_DIR = os.getcwd() + "data\\fma_small"
-
-for subdir, dirs, files in os.walk(AUDIO_DIR):
+for subdir, dirs, files in os.walk(Path(os.getcwd(), music_path)):
     for file in files:
         if file.endswith(".mp3"):
             #pp.convert_song_to_mono_channel(file)

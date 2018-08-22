@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+
 import IPython.display as ipd
 import numpy as np
 import pandas as pd
@@ -8,11 +10,15 @@ import sklearn as skl
 import sklearn.utils, sklearn.preprocessing, sklearn.decomposition, sklearn.svm
 import librosa
 import librosa.display
+import configparser
 
 
 class DataReader:
     def __init__(self):
         # Load metadata and features.
+        self.config = configparser.ConfigParser()
+        self.config.read('config.ini')
+
 
         '''
         self.tracks = pd.read_csv('tracks.csv')
@@ -29,14 +35,9 @@ class DataReader:
         print("Finished loading data\n")
         '''
 
-    def change_working_dir(self):
-        AUDIO_DIR = os.getcwd()+"data\\fma_small"
-        os.chdir("data\\fma_metadata")
-
     def load_genres(self):
-        self.change_working_dir()
         print("Loading genres csv...")
-        genres = pd.read_csv('genres.csv')
+        genres = pd.read_csv(Path(self.settings['metadata'], 'genres'))
         print("Finished loading genres")
         return genres
 
