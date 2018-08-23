@@ -14,10 +14,9 @@ import configparser
 
 
 class DataReader:
-    def __init__(self):
+    def __init__(self, configFile):
         # Load metadata and features.
-        self.config = configparser.ConfigParser()
-        self.config.read('config.ini')
+        self.config = configFile
 
 
         '''
@@ -37,7 +36,7 @@ class DataReader:
 
     def load_genres(self):
         print("Loading genres csv...")
-        genres = pd.read_csv(Path(self.settings['metadata'], 'genres'))
+        genres = pd.read_csv(Path(self.config['DEFAULT']['Metadata'], 'genres.csv'))
         print("Finished loading genres")
         return genres
 
