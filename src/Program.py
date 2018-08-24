@@ -2,8 +2,6 @@ from configparser import ConfigParser
 
 import config
 from pydub import AudioSegment
-from src.datautils.DataReader import DataReader
-import src.datautils.Preprocessing as pp
 import os
 from pathlib import Path
 from src.datautils.Preprocessor import split_songs_into_chunks
@@ -12,9 +10,8 @@ from src.datautils.Preprocessor import split_songs_into_chunks
 #AudioSegment.converter = "C:\\ffmpeg-win64\\bin\\ffmpeg.exe"
 #AudioSegment.ffprobe = "C:\\ffmpeg-win64\\bin\\ffprobe.exe"
 
-# config = ConfigParser()
-# config.read('config.ini')
-# print(config.sections())
+config = ConfigParser()
+config.read('config.ini')
 
 
 # reader = DataReader(config)
@@ -29,9 +26,10 @@ from src.datautils.Preprocessor import split_songs_into_chunks
 #     #print(index, genreDict[index])
 #
 # print(genreDict)
-music_path = config['DEFAULT']['TrackFolders']
-wav_folder = Path(os.getcwd(), "data\\wav_files")
-mp3_split = Path(os.getcwd(), "data\\mp3_split")
+
+music_path = Path(os.getcwd(), config['PATHS']['TrackFolder'])
+wav_folder = Path(os.getcwd(), config['PATHS']['WavFolder'])
+mp3_split = Path(os.getcwd(), config['PATHS']['Mp3SplitFolder'])
 
 
 split_songs_into_chunks(from_path=music_path, to_path=mp3_split)

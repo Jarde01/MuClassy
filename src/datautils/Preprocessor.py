@@ -1,5 +1,8 @@
+import threading
+import time
 from configparser import ConfigParser
 from pathlib import Path
+from threading import Thread
 
 import scipy.io.wavfile as wav
 from numpy.lib import stride_tricks
@@ -11,24 +14,35 @@ config = ConfigParser()
 config.read('config.ini')
 
 
-def split_songs_into_chunks(from_path, to_path, chunkSizeInSeconds=5):
-    for dirpath, dirs, files in os.walk(music_path):
+def split_songs_into_chunks(from_path, to_path, from_format="mp3", to_format="mp3", chunk_size_in_seconds=5):
+    for dirpath, dirs, files in os.walk(from_path):
         for file in files:
             if file.endswith(".mp3"):
                 # only need last 3 chars of the path b/c data is split into 3 digit folders
-                file_path = Path(os.getcwd(), music_path, dirpath[-3:], file)
+                file_path = Path(os.getcwd(), from_path, dirpath[-3:], file)
 
-                sound = AudioSegment.from_file(file_path, format="mp3")
+                sound = AudioSegment.from_file(file_path, format=from_format)
                 file_name = file[:-4]
                 # file_handle = sound.export(Path(wav_folder, file_name+".wav"), format="wav")
                 # file_handle = sound.export(Path(mp3_split, file_name+".mp3"), format="mp3")
 
-                # splitting training data into 5-second slices
-                for i, chunk in enumerate(sound[::chunkSizeInSeconds*1000]):
-                    with open(Path(mp3_split, file_name + "_" + str(i) + ".mp3"), "wb") as f:
-                        chunk.export(f, format="mp3")
+                # don't create too many threads
+                while threading.active_count() > 10:
+                    print("Currently: ", threading.active_count(), " threads alive")
+                    time.sleep(3)
 
-                print("Finished chunking song: ", file_name)
+                # create a thread and run it
+                t = Thread(target=chunk_song, args=(sound, file_name, to_path, to_format, chunk_size_in_seconds))
+                t.start()
+
+
+def chunk_song(sound, file_name, to_path, to_format, chunk_size_in_seconds):
+    # splitting training data into 5-second slices
+    for i, chunk in enumerate(sound[::chunk_size_in_seconds * 1000]):
+        with open(Path(to_path, file_name + "_" + str(i) + "." + to_format), "wb") as f:
+            chunk.export(f, format=to_format)
+
+    print("Finished chunking song: ", file_name)
 
 
 def convert_mp3_to_wav(from_path, to_path):
