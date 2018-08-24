@@ -39,8 +39,10 @@ def split_songs_into_chunks(from_path, to_path, from_format="mp3", to_format="mp
 def chunk_song(sound, file_name, to_path, to_format, chunk_size_in_seconds):
     # splitting training data into 5-second slices
     for i, chunk in enumerate(sound[::chunk_size_in_seconds * 1000]):
-        with open(Path(to_path, file_name + "_" + str(i) + "." + to_format), "wb") as f:
-            chunk.export(f, format=to_format)
+        file_path = Path(to_path, file_name + "_" + str(i) + "." + to_format)
+        if not os.path.isfile(file_path):
+            with open(file_path, "wb") as f:
+                chunk.export(f, format=to_format)
 
     print("Finished chunking song: ", file_name)
 
