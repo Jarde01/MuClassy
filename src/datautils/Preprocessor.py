@@ -4,6 +4,7 @@ from configparser import ConfigParser
 from pathlib import Path
 from threading import Thread
 
+import numpy
 import scipy.io.wavfile as wav
 from numpy.lib import stride_tricks
 from matplotlib import pyplot as plt
@@ -47,16 +48,29 @@ def chunk_song(sound, file_name, to_path, to_format, chunk_size_in_seconds):
     print("Finished chunking song: ", file_name)
 
 
-def convert_mp3_to_wav(from_path, to_path):
+def convert_mp3_to_wav_helper(from_path, to_path, threadcount=4):
+    # grab all of the files, split into number of threads then do the work
     for dirpath, dirs, files in os.walk(from_path):
-        for file in files:
-            if file.endswith(".mp3"):
-                # only need last 3 chars of the path b/c data is split into 3 digit folders
-                file_path = Path(os.getcwd(), from_path, dirpath[-3:], file)
-                sound = AudioSegment.from_file(file_path, format="mp3")
-                file_name = file[:-4]
+        data = numpy.array_split(files, threadcount)
 
-                sound.export(Path(to_path, file_name+".wav"), format="wav")
+        i = 0
+        while i < threadcount:
+            t = Thread(target=convert_mp3_to_wav, args=(dirpath, from_path, to_path, data[i]))
+            t.start()
+            i += 1
+
+
+def convert_mp3_to_wav(dirpath, from_path, to_path, data):
+    for file in data:
+        if file.endswith(".mp3"):
+            # only need last 3 chars of the path b/c data is split into 3 digit folders
+            file_path = Path(os.getcwd(), from_path, file)
+            sound = AudioSegment.from_file(file_path, format="mp3")
+            file_name = file[:-4]
+
+            sound.export(Path(to_path, file_name+".wav"), format="wav")
+
+            print("Finished converting song: ", file, " to wav format.")
 
 
 def split_song_into_chunks(songPath, songName, sliceSize=10000, format="mp3"):
