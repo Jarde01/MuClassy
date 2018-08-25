@@ -70,13 +70,16 @@ def convert_mp3_to_wav(dirpath, from_path, to_path, data):
 
             if not os.path.isfile(file_name_wav):
                 # only need last 3 chars of the path b/c data is split into 3 digit folders
-                sound = AudioSegment.from_file(file_path, format="mp3")
+                try:
+                    sound = AudioSegment.from_file(file_path, format="mp3")
+                    sound.export(file_name_wav, format="wav")
 
-                sound.export(file_name_wav, format="wav")
+                    os.rename(file_path, Path(from_path, "complete", file_name + ".mp3"))
 
-                os.rename(file_path, Path(from_path, "complete", file_name+".mp3"))
-
-                print("Finished converting song: ", file, " to wav format.")
+                    print("Finished converting song: ", file, " to wav format.")
+                except IndexError:
+                    time.sleep(1)
+                #     os.rename(file_path, Path(from_path, "broken", file_name+".mp3"))
             else:
                 os.rename(file_path, Path(from_path, "complete", file))
                 print(file, " already exists")
