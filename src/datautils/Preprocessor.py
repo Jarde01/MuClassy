@@ -51,13 +51,14 @@ def chunk_song(sound, file_name, to_path, to_format, chunk_size_in_seconds):
 def convert_mp3_to_wav_helper(from_path, to_path, threadcount=4):
     # grab all of the files, split into number of threads then do the work
     for dirpath, dirs, files in os.walk(from_path):
-        data = numpy.array_split(files, threadcount)
+        if not dirpath.endswith("complete"):
+            data = numpy.array_split(files, threadcount)
 
-        i = 0
-        while i < threadcount:
-            t = Thread(target=convert_mp3_to_wav, args=(dirpath, from_path, to_path, data[i]))
-            t.start()
-            i += 1
+            i = 0
+            while i < threadcount:
+                t = Thread(target=convert_mp3_to_wav, args=(dirpath, from_path, to_path, data[i]))
+                t.start()
+                i += 1
 
 
 def convert_mp3_to_wav(dirpath, from_path, to_path, data):
@@ -73,7 +74,13 @@ def convert_mp3_to_wav(dirpath, from_path, to_path, data):
 
                 sound.export(file_name_wav, format="wav")
 
+                os.rename(file_path, Path(from_path, "complete", file_name+".mp3"))
+
                 print("Finished converting song: ", file, " to wav format.")
+            else:
+                os.rename(file_path, Path(from_path, "complete", file))
+                print(file, " already exists")
+
 
 
 def split_song_into_chunks(songPath, songName, sliceSize=10000, format="mp3"):
