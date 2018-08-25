@@ -63,14 +63,17 @@ def convert_mp3_to_wav_helper(from_path, to_path, threadcount=4):
 def convert_mp3_to_wav(dirpath, from_path, to_path, data):
     for file in data:
         if file.endswith(".mp3"):
-            # only need last 3 chars of the path b/c data is split into 3 digit folders
             file_path = Path(os.getcwd(), from_path, file)
-            sound = AudioSegment.from_file(file_path, format="mp3")
             file_name = file[:-4]
+            file_name_wav = Path(to_path, file_name + ".wav")
 
-            sound.export(Path(to_path, file_name+".wav"), format="wav")
+            if not os.path.isfile(file_name_wav):
+                # only need last 3 chars of the path b/c data is split into 3 digit folders
+                sound = AudioSegment.from_file(file_path, format="mp3")
 
-            print("Finished converting song: ", file, " to wav format.")
+                sound.export(file_name_wav, format="wav")
+
+                print("Finished converting song: ", file, " to wav format.")
 
 
 def split_song_into_chunks(songPath, songName, sliceSize=10000, format="mp3"):

@@ -35,9 +35,9 @@ mp3_split = Path(os.getcwd(), config['PATHS']['Mp3SplitFolder'])
 t1 = Thread(target=split_songs_into_chunks, args=(music_path, mp3_split))
 t1.start()
 
-t2 = Thread(target=convert_mp3_to_wav_helper, args=(mp3_split, wav_folder, 4))
-t2.start()
+#t2 = Thread(target=convert_mp3_to_wav_helper, args=(mp3_split, wav_folder, 4))
+#t2.start()
 
 t1.join()
-t2.join()
+#t2.join()
 
