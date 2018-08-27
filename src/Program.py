@@ -54,6 +54,9 @@ def create_spectrogram(file_path, to_path):
     sample_rate, samples = wavfile.read(file_path)
     frequencies, times, spectrogram = signal.spectrogram(samples, sample_rate)
 
+    #dBS = 10*numpy.log10(spectrogram) # converting to dB
+    #plt.pcolormesh(times, frequencies, dBS)
+
     plt.pcolormesh(times, frequencies, spectrogram)
     plt.imshow(spectrogram)
     plt.show()
