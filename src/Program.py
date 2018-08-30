@@ -30,6 +30,7 @@ spec_folder = Path(os.getcwd(), config['PATHS']['SpecFolder'])
 
 
 def create_spectrogram_helper(from_path, to_path, threadcount=4):
+
     for dirpath, dirs, files in os.walk(from_path):
         for file in files:
         #if not dirpath.endswith("complete"):
@@ -47,7 +48,10 @@ def create_spectrogram_helper(from_path, to_path, threadcount=4):
             #     t.start()
             #     i += 1
 
-            create_spectrogram(wav_file_path, to_path)
+            sound = AudioSegment.from_file(wav_file_path, format="wav")
+            channel_count = sound.channels
+            print(channel_count)
+            # create_spectrogram(wav_file_path, to_path)
 
 
 def create_spectrogram(file_path, to_path):
