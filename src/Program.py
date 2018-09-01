@@ -50,12 +50,17 @@ def create_spectrogram_helper(from_path, to_path, threadcount=4):
 
             sound = AudioSegment.from_file(wav_file_path, format="wav")
             channel_count = sound.channels
-            print(channel_count)
-            # create_spectrogram(wav_file_path, to_path)
+
+            if channel_count is 2:
+                sound.set_channels(1)
+
+            filename = str(wav_file_path)[:-4] + "_tests.wav"
+            sound.export(filename, format="wav")
+            create_spectrogram(filename, to_path)
 
 
 def create_spectrogram(file_path, to_path):
-    sample_rate, samples = wavfile.read(file_path)
+    sample_rate, samples = wavfile.read(Path(file_path))
     frequencies, times, spectrogram = signal.spectrogram(samples, sample_rate)
 
     #dBS = 10*numpy.log10(spectrogram) # converting to dB
