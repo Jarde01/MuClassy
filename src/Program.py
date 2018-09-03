@@ -1,10 +1,12 @@
 import threading
 import time
+import wave
 from configparser import ConfigParser
 from threading import Thread
 
 import config
 import numpy
+import pylab
 from pydub import AudioSegment
 import os
 from pathlib import Path
@@ -30,7 +32,7 @@ spec_folder = Path(os.getcwd(), config['PATHS']['SpecFolder'])
 
 
 def create_spectrogram_helper(from_path, to_path, threadcount=4):
-
+    i = 0
     for dirpath, dirs, files in os.walk(from_path):
         for file in files:
         #if not dirpath.endswith("complete"):
@@ -48,15 +50,43 @@ def create_spectrogram_helper(from_path, to_path, threadcount=4):
             #     t.start()
             #     i += 1
 
-            sound = AudioSegment.from_file(wav_file_path, format="wav")
-            channel_count = sound.channels
+            # sound = AudioSegment.from_file(wav_file_path, format="wav")
+            # channel_count = sound.channels
+            #
+            # if channel_count is 2:
+            #     sound.set_channels(1)
+            #
+            # filename = str(wav_file_path)[:-4] + "_tests.wav"
+            # sound.export(filename, format="wav")
+            # create_spectrogram(wav_file_path, to_path)
+            print(wav_file_path)
 
-            if channel_count is 2:
-                sound.set_channels(1)
+            graph_spectrogram(wav_file_path, i)
+            i += 1
 
-            filename = str(wav_file_path)[:-4] + "_tests.wav"
-            sound.export(filename, format="wav")
-            create_spectrogram(filename, to_path)
+
+def graph_spectrogram(wav_file, i):
+    sound_info, frame_rate = get_wav_info(wav_file)
+    fig = pylab.figure(num=None, frameon=False)
+    fig.set_size_inches(20, 10)
+    axis = pylab.Axes(fig, [0., 0, 1., 1.])
+    axis.set_axis_off()
+    fig.add_axes(axis)
+    # pylab.specgram(sound_info, Fs=frame_rate)
+    # larger values of NFFT will cause the middle freq to become to pronounced
+    pylab.specgram(sound_info, Fs=frame_rate, NFFT=80, noverlap=64)
+    pylab.savefig(str(i)+'_spectrogram.png')
+    pylab.close()
+
+
+def get_wav_info(wav_file):
+    wav = wave.open(str(wav_file), 'r')
+    # wav.setnchannels(1)
+    frames = wav.readframes(-1)
+    sound_info = pylab.fromstring(frames, 'Int16')
+    frame_rate = wav.getframerate()
+    wav.close()
+    return sound_info, frame_rate
 
 
 def create_spectrogram(file_path, to_path):
