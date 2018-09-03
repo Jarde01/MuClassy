@@ -1,7 +1,9 @@
+import multiprocessing
 import threading
 import time
 import wave
 from configparser import ConfigParser
+from multiprocessing.pool import Pool
 from threading import Thread
 
 import config
@@ -35,8 +37,6 @@ def create_spectrogram_helper(from_path, to_path, threadcount=4):
     i = 0
     for dirpath, dirs, files in os.walk(from_path):
         for file in files:
-        #if not dirpath.endswith("complete"):
-            data = numpy.array_split(files, threadcount)
             wav_file_path = Path(os.getcwd(), from_path, file)
 
             # # don't create too many threads
@@ -44,15 +44,12 @@ def create_spectrogram_helper(from_path, to_path, threadcount=4):
             #     print("Currently: ", threading.active_count(), " threads alive")
             #     time.sleep(3)
             #
-            # i = 0
-            # while i < threadcount:
-            #     t = Thread(target=graph_spectrogram, args=(wav_file_path, to_path))
-            #     t.start()
-            #     i += 1
+            # t = Thread(target=graph_spectrogram, args=(wav_file_path, to_path))
+            # t.start()
             graph_spectrogram(wav_file_path, to_path)
 
 
-def graph_spectrogram(wav_file, to_path):
+def graph_spectrogram(wav_file, to_path='data\\spectrograms'):
     spec_file_path = Path(to_path, str(Path(wav_file).name)[:-4] + '.png')
     if os.path.isfile(spec_file_path):
         print(Path(spec_file_path).name, " already exists")
@@ -66,7 +63,7 @@ def graph_spectrogram(wav_file, to_path):
         # pylab.specgram(sound_info, Fs=frame_rate)
         # larger values of NFFT will cause the middle freq to become to pronounced
         pylab.specgram(sound_info, Fs=frame_rate, NFFT=80, noverlap=64)
-        pylab.savefig()
+        pylab.savefig(spec_file_path)
         pylab.close()
 
 
@@ -94,4 +91,24 @@ def get_genre_dict():
     print(genre_dict)
 
 
+def multiprocess_spectrogram(from_path, to_path, workers=4):
+    i = 0
+    files = os.listdir(from_path)
+    p = multiprocessing.Pool(workers)
+    p.imap(graph_spectrogram, (Path(os.getcwd(), from_path, file) for file in files)
+)
+
+    # wav_file_path = Path(os.getcwd(), from_path, file)
+
+    # don't create too many threads
+    while threading.active_count() > threadcount:
+        print("Currently: ", threading.active_count(), " threads alive")
+        time.sleep(3)
+
+    t = Thread(target=graph_spectrogram, args=(wav_file_path, to_path))
+    t.start()
+    # graph_spectrogram(wav_file_path, to_path)
+
+
 create_spectrogram_helper(wav_folder, spec_folder, threadcount=10)
+# multiprocess_spectrogram(wav_folder, spec_folder, workers=10)
