@@ -34,9 +34,15 @@ class DataReader:
         print("Finished loading data\n")
         '''
 
+    def load_tracks(self):
+        print("Loading tracks csv")
+        tracks = pd.read_csv(Path(self.config['PATHS']['Metadata'], self.config['FILES']['Tracks']))
+        print("Finished loading tracks")
+        return tracks
+
     def load_genres(self):
         print("Loading genres csv...")
-        genres = pd.read_csv(Path(self.config['DEFAULT']['Metadata'], 'genres.csv'))
+        genres = pd.read_csv(Path(self.config['PATHS']['Metadata'], 'genres.csv'))
         print("Finished loading genres")
         return genres
 

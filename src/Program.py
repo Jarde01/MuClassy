@@ -25,7 +25,7 @@ from scipy.io import wavfile
 
 config = ConfigParser()
 config.read('config.ini')
-
+data_reader = DataReader(config)
 
 music_path = Path(os.getcwd(), config['PATHS']['TrackFolder'])
 wav_folder = Path(os.getcwd(), config['PATHS']['WavFolder'])
@@ -90,25 +90,58 @@ def get_genre_dict():
 
     print(genre_dict)
 
+#
+# def multiprocess_spectrogram(from_path, to_path, workers=4):
+#     i = 0
+#     files = os.listdir(from_path)
+#     p = multiprocessing.Pool(workers)
+#     p.imap(graph_spectrogram, (Path(os.getcwd(), from_path, file) for file in files)
+#
+#     # wav_file_path = Path(os.getcwd(), from_path, file)
+#
+#     # don't create too many threads
+#     while threading.active_count() > threadcount:
+#         print("Currently: ", threading.active_count(), " threads alive")
+#         time.sleep(3)
+#
+#     t = Thread(target=graph_spectrogram, args=(wav_file_path, to_path))
+#     t.start()
+#     # graph_spectrogram(wav_file_path, to_path)
 
-def multiprocess_spectrogram(from_path, to_path, workers=4):
-    i = 0
-    files = os.listdir(from_path)
-    p = multiprocessing.Pool(workers)
-    p.imap(graph_spectrogram, (Path(os.getcwd(), from_path, file) for file in files)
-)
 
-    # wav_file_path = Path(os.getcwd(), from_path, file)
+def tag_files(from_path, to_path, threadcount=4):
+    genres_df = data_reader.load_genres()
+    genres_dict = genres_df.to_dict()
 
-    # don't create too many threads
-    while threading.active_count() > threadcount:
-        print("Currently: ", threading.active_count(), " threads alive")
-        time.sleep(3)
+    tracks_df = data_reader.load_tracks()
+    tracks_dict = tracks_df.to_dict()
 
-    t = Thread(target=graph_spectrogram, args=(wav_file_path, to_path))
-    t.start()
-    # graph_spectrogram(wav_file_path, to_path)
+    for dirpath, dirs, files in os.walk(from_path):
+        for file in files:
+            file_path = Path(os.getcwd(), from_path, file)
+
+            # # don't create too many threads
+            # while threading.active_count() > threadcount:
+            #     print("Currently: ", threading.active_count(), " threads alive")
+            #     time.sleep(3)
+            #
+            # t = Thread(target=rename_file_with_genre, args=(file_path, genres_dict, tracks_dict))
+            # t.start()
+            rename_file_with_genre(file_path, genres_dict, tracks_dict)
 
 
-create_spectrogram_helper(wav_folder, spec_folder, threadcount=10)
+def rename_file_with_genre(file_path, genres_dict, tracks_dict):
+    tokens = Path(file_path).name.split('_')
+    id = tokens[0].lstrip('0')
+
+    try:
+        x = tracks_dict[id]
+    except:
+        print(id, "Key error")
+        
+    print(tokens)
+
+
+tag_files(spec_folder, spec_folder, threadcount=10)
+# create_spectrogram_helper(wav_folder, spec_folder, threadcount=10)
 # multiprocess_spectrogram(wav_folder, spec_folder, workers=10)
